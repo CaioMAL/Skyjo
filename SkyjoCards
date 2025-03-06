@@ -1,0 +1,16 @@
+import java.awt.*;
+import javax.swing.JFrame;
+
+public class SkyjoCards extends JFrame{
+	private static final int WIDTH = 1900;
+	private static final int HEIGHT = 900;
+	
+	public SkyjoCards(String title)
+	{
+		super(title);
+		setSize(WIDTH, HEIGHT);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		add(new SkyjoCardsPanel());
+		setVisible(true);
+	}
+}
