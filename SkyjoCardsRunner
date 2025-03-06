@@ -1,0 +1,6 @@
+public class SkyjoCardsRunner {
+	public static void main(String[] args)
+	{
+		SkyjoCards imageTest = new SkyjoCards("Image real");
+	}
+}
