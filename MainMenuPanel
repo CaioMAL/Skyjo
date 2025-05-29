@@ -1,0 +1,89 @@
+
+import java.awt.*;
+import javax.swing.*;
+import java.awt.image.*;
+import javax.imageio.ImageIO;
+import java.io.*;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
+import java.awt.geom.AffineTransform;
+
+import javax.swing.border.Border;
+
+public class MainMenuPanel extends JPanel implements Runnable, MouseListener, MouseMotionListener {
+    private BufferedImage background;   // The full background (splendorbackground.jpg)
+    private BufferedImage rulesButton;  // Rules button as an image
+    private BufferedImage playButton;
+
+    public MainMenuPanel() {
+    	
+        try {
+            background = ImageIO.read(SkyjoCardsPanel.class.getResource("/Image/bg.jpg"));
+            playButton = ImageIO.read(SkyjoCardsPanel.class.getResource("/Image/play.png"));
+            rulesButton = ImageIO.read(SkyjoCardsPanel.class.getResource("/Image/rulesButton.png"));
+        } catch (IOException e) {
+        	System.out.println("Exception Error");
+			return;
+        }
+
+        addMouseListener(this);
+        addMouseMotionListener(this);
+        setFocusable(true);
+    }
+
+
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.drawImage(background, 0, 0, getWidth(), getHeight(), null);
+        g2d.drawImage(playButton, 650, 400, 600, 300, null);
+        g2d.drawImage(rulesButton, 735, 600, 400, 200, null);
+
+    }
+
+    
+    public void mouseClicked(MouseEvent e) {
+        int x = e.getX();
+        int y = e.getY();
+        System.out.println(x + "," + y);
+        
+        if (e.getButton() == MouseEvent.BUTTON1) {
+        	
+        	if(x >= 745 && x <= 1200 && y >= 460 && y <= 640)
+        	{
+        		
+        		System.out.println("play");
+        		JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+                topFrame.getContentPane().removeAll();
+                topFrame.add(new SkyjoCardsPanel()); // Navigate to game panel
+                topFrame.revalidate();
+                topFrame.repaint();
+        	}
+        	if(x >= 790 && x <= 1100 && y >= 645 && y <= 750)
+        	{
+        		System.out.println("rules");
+        		JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+                topFrame.getContentPane().removeAll();
+                topFrame.add(new RulesPanel()); // Navigate to RulesPanel
+                topFrame.revalidate();
+                topFrame.repaint();
+        	}
+        	
+        }
+    }
+
+    public void mouseReleased(MouseEvent e) { }
+
+    public void mousePressed(MouseEvent e) { }
+
+    public void mouseEntered(MouseEvent e) { }
+
+    public void mouseMoved(MouseEvent e) { }
+
+    public void mouseDragged(MouseEvent e) { }
+
+    public void mouseExited(MouseEvent e) { }
+
+    public void run() { }
+}
