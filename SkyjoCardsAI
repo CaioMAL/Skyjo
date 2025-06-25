@@ -1,0 +1,1135 @@
+import java.awt.*;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import javax.swing.*;
+import java.awt.image.*;
+import javax.imageio.ImageIO;
+
+
+public class SkyjoCardsAI extends JPanel implements MouseListener{
+	
+	private BufferedImage cb, table, again, next;
+	private CardDeck deck = new CardDeck();
+	private Player p1 = new Player(deck);
+	private Player p2 = new Player(deck);
+	private Discard discardPile = new Discard();
+	private boolean startOfGame = true;
+	private int p1NumStartCardsFlipped = 0;
+	private int p2NumStartCardsFlipped = 0;
+	private boolean p1NeedToFlip = false;
+	private boolean p2NeedToFlip = false;
+	private boolean p1DiscardDraw = false;
+	private boolean p2DiscardDraw = false;
+	private boolean p1EndTurns = false;
+	private boolean p2EndTurns = false;
+	private int remainingTurns = 1;
+	private boolean endRound = false;
+	private boolean newRound = false;
+	private boolean p1EndedFirst = false;
+	private boolean gameHasEnded = false;
+	private String winner = "no one";
+	
+	public SkyjoCardsAI()
+	{
+		try
+		{
+			cb = ImageIO.read(SkyjoCardsAI.class.getResource("/Image/skyjoBack.jpg"));
+			table = ImageIO.read(SkyjoCardsAI.class.getResource("/Image/table.jpg"));
+			again = ImageIO.read(SkyjoCardsAI.class.getResource("/Image/again.png"));
+			next = ImageIO.read(SkyjoCardsAI.class.getResource("/Image/next.png"));
+		}
+		catch(Exception E)
+		{
+			System.out.println("Exception Error");
+			return;
+		}
+		
+		addMouseListener(this);
+		deck.discardAdd(discardPile);
+		p1.setTurn(true);
+	}
+	
+	public void paint(Graphics g)
+	{
+		super.paint(g);
+		g.drawImage(table, 0, 0, getWidth(), getHeight(), null);
+		g.setColor(Color.BLACK);
+		g.setFont(new Font("Ariel", Font.PLAIN, 35));
+		
+		paintP1(g);
+		paintP2(g);
+		paintDeck(g);
+		
+		g.drawString("P1 Score: " + p1.getScore(), getWidth()*39/88, getHeight()*45/50);
+		g.drawString("P2 Score: " + p2.getScore(), getWidth()*39/88, getHeight()*48/50);
+		
+		//draw rules/info
+		if(startOfGame)
+			g.drawString("Flip 2 cards each", getWidth()*152/352, getHeight()*2/50);
+		if(p1.getTurn() && !startOfGame)
+			g.drawString("Player 1 Turn", getWidth()*158/352, getHeight()*2/50);
+		if(p1.getTurn() && !startOfGame && p1.getHand() != null)
+			g.drawString("Currently Holding: " + p1.getHand().getValue(), getWidth()*147/352, getHeight()*5/50);
+		if(p2.getTurn() && !startOfGame)
+			g.drawString("Player 2 Turn", getWidth()*158/352, getHeight()*2/50);
+		if(p2.getTurn() && !startOfGame && p2.getHand() != null)
+			g.drawString("Currently Holding: " + p2.getHand().getValue(), getWidth()*147/352, getHeight()*5/50);
+		if(p2NeedToFlip && !endRound)
+			g.drawString("P2 Flip a Card", getWidth()*147/352, getHeight()*5/50);
+		if(p1NeedToFlip && !endRound)
+			g.drawString("P1 Flip a Card", getWidth()*147/352, getHeight()*5/50);
+		if(p1.getTurn() && endRound)
+			g.drawString("P1 Flip Remaining Cards", getWidth()*141/352, getHeight()*5/50);
+		if(p2.getTurn() && endRound)
+			g.drawString("P2 Flip Remaining Cards", getWidth()*141/352, getHeight()*5/50);
+		if(newRound)
+		{
+			g.drawImage(table, 0, 0, getWidth(), getHeight(), null);
+			g.setColor(Color.BLACK);
+			g.setFont(new Font("Ariel", Font.PLAIN, 45));
+			g.drawString("Round over, click below to continue", getWidth()*100/300, getHeight()*1/3);
+			g.drawImage(next, 650, 450, 600, 300, null);
+		}
+		if(gameHasEnded && !winner.equals("The Game has Ended in a Tie"))
+		{
+			g.drawImage(table, 0, 0, getWidth(), getHeight(), null);
+			g.setColor(Color.BLACK);
+			g.setFont(new Font("Ariel", Font.PLAIN, 45));
+			g.drawString("The Game is Over and the Winner is " + winner, getWidth()*80/300, getHeight()*2/10);
+			g.drawString("P1 had " + p1.getScore() + " Points", getWidth()*126/300, getHeight()*3/10);
+			g.drawString("P2 had " + p2.getScore() + " Points", getWidth()*126/300, getHeight()*4/10);
+			g.drawImage(again, 650, 450, 600, 300, null);
+		}
+		if(gameHasEnded && winner.equals("The Game has Ended in a Tie"))
+		{
+			g.drawImage(table, 0, 0, getWidth(), getHeight(), null);
+			g.setColor(Color.BLACK);
+			g.setFont(new Font("Ariel", Font.PLAIN, 45));
+			g.drawString(winner + "With Each Player Having " + p1.getScore() + " Points", getWidth()*100/300, getHeight()*1/3);
+			g.drawImage(again, 650, 450, 600, 300, null);
+		}
+		
+	}
+	
+	public void paintP1(Graphics g)
+	{
+		g.drawImage(p1.getArray().get(0).getFace(), 0, 0, getWidth()/10, getHeight()/3, null);
+		g.drawImage(p1.getArray().get(1).getFace(), getWidth()/10, 0, getWidth()/10, getHeight()/3, null);
+		g.drawImage(p1.getArray().get(2).getFace(), getWidth()*2/10, 0, getWidth()/10, getHeight()/3, null);
+		g.drawImage(p1.getArray().get(3).getFace(), getWidth()*3/10, 0, getWidth()/10, getHeight()/3, null);
+		g.drawImage(p1.getArray().get(4).getFace(), 0, getHeight()*1/3, getWidth()/10, getHeight()/3, null);
+		g.drawImage(p1.getArray().get(5).getFace(), getWidth()/10, getHeight()*1/3, getWidth()/10, getHeight()/3, null);
+		g.drawImage(p1.getArray().get(6).getFace(), getWidth()*2/10, getHeight()*1/3, getWidth()/10, getHeight()/3, null);
+		g.drawImage(p1.getArray().get(7).getFace(), getWidth()*3/10, getHeight()*1/3, getWidth()/10, getHeight()/3, null);
+		g.drawImage(p1.getArray().get(8).getFace(), 0, getHeight()*2/3, getWidth()/10, getHeight()/3, null);
+		g.drawImage(p1.getArray().get(9).getFace(), getWidth()/10, getHeight()*2/3, getWidth()/10, getHeight()/3, null);
+		g.drawImage(p1.getArray().get(10).getFace(), getWidth()*2/10, getHeight()*2/3, getWidth()/10, getHeight()/3, null);
+		g.drawImage(p1.getArray().get(11).getFace(), getWidth()*3/10, getHeight()*2/3, getWidth()/10, getHeight()/3, null);
+	}
+	
+	public void paintP2(Graphics g)
+	{
+		g.drawImage(p2.getArray().get(0).getFace(), getWidth()*6/10, 0, getWidth()/10, getHeight()/3, null);
+		g.drawImage(p2.getArray().get(1).getFace(), getWidth()*7/10, 0, getWidth()/10, getHeight()/3, null);
+		g.drawImage(p2.getArray().get(2).getFace(), getWidth()*8/10, 0, getWidth()/10, getHeight()/3, null);
+		g.drawImage(p2.getArray().get(3).getFace(), getWidth()*9/10, 0, getWidth()/10, getHeight()/3, null);
+		g.drawImage(p2.getArray().get(4).getFace(), getWidth()*6/10, getHeight()*1/3, getWidth()/10, getHeight()/3, null);
+		g.drawImage(p2.getArray().get(5).getFace(), getWidth()*7/10, getHeight()*1/3, getWidth()/10, getHeight()/3, null);
+		g.drawImage(p2.getArray().get(6).getFace(), getWidth()*8/10, getHeight()*1/3, getWidth()/10, getHeight()/3, null);
+		g.drawImage(p2.getArray().get(7).getFace(), getWidth()*9/10, getHeight()*1/3, getWidth()/10, getHeight()/3, null);
+		g.drawImage(p2.getArray().get(8).getFace(), getWidth()*6/10, getHeight()*2/3, getWidth()/10, getHeight()/3, null);
+		g.drawImage(p2.getArray().get(9).getFace(), getWidth()*7/10, getHeight()*2/3, getWidth()/10, getHeight()/3, null);
+		g.drawImage(p2.getArray().get(10).getFace(), getWidth()*8/10, getHeight()*2/3, getWidth()/10, getHeight()/3, null);
+		g.drawImage(p2.getArray().get(11).getFace(), getWidth()*9/10, getHeight()*2/3, getWidth()/10, getHeight()/3, null);
+	}
+	
+	public void paintDeck(Graphics g)
+	{
+		g.drawImage(cb, getWidth()*5/11, getHeight()*1/6, getWidth()/10, getHeight()/3, null);
+		g.drawImage(discardPile.getTopCard().getFace(), getWidth()*5/11, getHeight()*3/6, getWidth()/10, getHeight()/3, null);
+	}
+	
+	public void cycleTurn()
+	{
+		if(p1EndTurns && p2EndTurns)
+		{
+			newRound = true;
+			if(p1EndedFirst && p1.getScore() > p2.getScore())
+				p1.doubleScore();
+			else if(!p1EndedFirst && p1.getScore() < p2.getScore())
+				p2.doubleScore();
+		}
+		if(p1EndTurns)
+		{
+			p1.setTurn(false);
+			p2.setTurn(true);
+			remainingTurns--;
+			if(remainingTurns == 0)
+				p1EndedFirst = true;
+			if(remainingTurns <= -1)
+			{
+				endRound = true;
+				p2NeedToFlip = true;
+			}
+		}
+		else if(p2EndTurns)
+		{
+			p2.setTurn(false);
+			p1.setTurn(true);
+			remainingTurns--;
+			if(remainingTurns == 0)
+				p1EndedFirst = false;
+			if(remainingTurns <= -1)
+			{
+				endRound = true;
+				p1NeedToFlip = true;
+			}
+		}
+		else if(p1.getTurn())
+		{
+			p1.setTurn(false);
+			p2.setTurn(true);
+		}
+		else if(!p1.getTurn())
+		{
+			p1.setTurn(true);
+			p2.setTurn(false);
+		}
+	}
+	
+	public void setStartTurn()
+	{
+		startOfGame = false;
+		if(p1.getScore() < p2.getScore())
+		{
+			p1.setTurn(false);
+			p2.setTurn(true);
+		}
+		else
+		{
+			p1.setTurn(true);
+			p2.setTurn(false);
+		}
+	}
+	
+	public void startNewRound()
+	{
+		if(p1.getScore() >= 100 && p2.getScore() >= 100)
+		{
+			gameHasEnded = true;
+			if(p1.getScore() > p2.getScore())
+				winner = "Player 2";
+			else if (p1.getScore() == p2.getScore())
+				winner = "The Game has Ended in a Tie";
+			else
+				winner = "Player 1";
+		}
+		else if(p1.getScore() >= 100)
+		{
+			gameHasEnded = true;
+			winner = "Player 2";
+		}
+		else if (p2.getScore() >= 100)
+		{
+			gameHasEnded = true;
+			winner = "Player 1";
+		}
+		
+		deck = new CardDeck();
+		
+		discardPile = new Discard();
+		deck.discardAdd(discardPile);
+		
+		p1.setTurn(true);
+		p2.setTurn(false);
+		
+		startOfGame = true;
+		p1NumStartCardsFlipped = 0;
+		p2NumStartCardsFlipped = 0;
+		p1NeedToFlip = false;
+		p2NeedToFlip = false;
+		p1DiscardDraw = false;
+		p2DiscardDraw = false;
+		p1EndTurns = false;
+		p2EndTurns = false;
+		remainingTurns = 1;
+		endRound = false;
+		newRound = false;
+		p1EndedFirst = false;
+		
+		deck.makeArray(p1);
+		deck.makeArray(p2);
+		
+	}
+	
+	public void mousePressed(MouseEvent e)   { }
+	public void mouseReleased(MouseEvent e)  { }
+	public void mouseEntered(MouseEvent e)   { }
+	public void mouseExited(MouseEvent e)    { }
+	public void mouseClicked(MouseEvent e) {
+	    int x = e.getX();
+	    int y = e.getY();
+	    System.out.println("loc is (" + x + "," + y + ")");
+	    
+	    if (e.getButton() == MouseEvent.BUTTON1) {
+	    	
+	    	//play again button
+	    	if(x >= 727 && x <= 1171 && y >= 674 && y <= 834 && gameHasEnded)
+        	{
+        		System.out.println("again");
+        		JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+                topFrame.getContentPane().removeAll();
+                topFrame.add(new SkyjoCardsAI());
+                topFrame.revalidate();
+                topFrame.repaint();
+        	}
+	    	
+	    	if(p1.getTurn() && !newRound)
+	    	{
+	    		//p1 side cards
+	    		if (x >= 0 && y >= 0 && x <= getWidth()/10 && y <= getHeight()/3 && p1.getArray().get(0).isClickable())
+	    		{
+	    			if(startOfGame)
+	    			{
+	    				p1.getArray().get(0).setFaceUp(true);
+	    				p1.updateScore();
+	    				p1NumStartCardsFlipped++;
+	    				if(p1NumStartCardsFlipped == 2)
+	    				{
+	    					cycleTurn();
+	    				}
+	    			}
+	    			if(p1NeedToFlip)
+	    			{
+	    				p1.getArray().get(0).setFaceUp(true);
+	    				p1.checkCol(0, discardPile);
+	    				p1.updateScore();
+	    				p1NeedToFlip = false;
+	    				if(p1.checkIfAllFlipped())
+	    					p1EndTurns = true;
+	    				cycleTurn();		
+	    			}
+	    			if(p1.getHand() != null)
+	    			{
+	    				p1.replaceCard(0, discardPile);
+	    				p1.checkCol(0, discardPile);
+	    				p1.updateScore();
+	    				if(p1.checkIfAllFlipped())
+	    					p1EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    		}
+	    		else if (x >= getWidth()/10 && y >= 0 && x <= getWidth()*2/10 && y <= getHeight()/3 && p1.getArray().get(1).isClickable())
+	    		{
+	    			if(startOfGame)
+	    			{
+	    				p1.getArray().get(1).setFaceUp(true);
+	    				p1.updateScore();
+	    				p1NumStartCardsFlipped++;
+	    				if(p1NumStartCardsFlipped == 2)
+	    				{
+	    					cycleTurn();
+	    				}
+	    			}
+	    			if(p1NeedToFlip)
+	    			{
+	    				p1.getArray().get(1).setFaceUp(true);
+	    				p1.checkCol(1, discardPile);
+	    				p1.updateScore();
+	    				p1NeedToFlip = false;
+	    				if(p1.checkIfAllFlipped())
+	    					p1EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    			if(p1.getHand() != null)
+	    			{
+	    				p1.replaceCard(1, discardPile);
+	    				p1.checkCol(1, discardPile);
+	    				p1.updateScore();
+	    				if(p1.checkIfAllFlipped())
+	    					p1EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    		}
+	    		else if (x >= getWidth()*2/10 && y >= 0 && x <= getWidth()*3/10 && y <= getHeight()/3 && p1.getArray().get(2).isClickable())
+	    		{	
+	    			if(startOfGame)
+	    			{
+	    				p1.getArray().get(2).setFaceUp(true);
+	    				p1.updateScore();
+	    				p1NumStartCardsFlipped++;
+	    				if(p1NumStartCardsFlipped == 2)
+	    				{
+	    					cycleTurn();
+	    				}
+	    			}
+	    			if(p1NeedToFlip)
+	    			{
+	    				p1.getArray().get(2).setFaceUp(true);
+	    				p1.checkCol(2, discardPile);
+	    				p1.updateScore();
+	    				p1NeedToFlip = false;
+	    				if(p1.checkIfAllFlipped())
+	    					p1EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    			if(p1.getHand() != null)
+	    			{
+	    				p1.replaceCard(2, discardPile);
+	    				p1.checkCol(2, discardPile);
+	    				p1.updateScore();
+	    				if(p1.checkIfAllFlipped())
+	    					p1EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    		}
+	    		else if (x >= getWidth()*3/10 && y >= 0 && x <= getWidth()*4/10 && y <= getHeight()/3 && p1.getArray().get(3).isClickable())
+	    		{
+	    			if(startOfGame)
+	    			{
+	    				p1.getArray().get(3).setFaceUp(true);
+	    				p1.updateScore();
+	    				p1NumStartCardsFlipped++;
+	    				if(p1NumStartCardsFlipped == 2)
+	    				{
+	    					cycleTurn();
+	    				}
+	    			}
+	    			if(p1NeedToFlip)
+	    			{
+	    				p1.getArray().get(3).setFaceUp(true);
+	    				p1.checkCol(3, discardPile);
+	    				p1.updateScore();
+	    				p1NeedToFlip = false;
+	    				if(p1.checkIfAllFlipped())
+	    					p1EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    			if(p1.getHand() != null)
+	    			{
+	    				p1.replaceCard(3, discardPile);
+	    				p1.checkCol(3, discardPile);
+	    				p1.updateScore();
+	    				if(p1.checkIfAllFlipped())
+	    					p1EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    		}
+	    		else if (x >= 0 && y >= getHeight()/3 && x <= getWidth()/10 && y <= getHeight()*2/3 && p1.getArray().get(4).isClickable())
+	        	{
+	    			if(startOfGame)
+	    			{
+	    				p1.getArray().get(4).setFaceUp(true);
+	    				p1.updateScore();
+	    				p1NumStartCardsFlipped++;
+	    				if(p1NumStartCardsFlipped == 2)
+	    				{
+	    					cycleTurn();
+	    				}
+	    			}
+	    			if(p1NeedToFlip)
+	    			{
+	    				p1.getArray().get(4).setFaceUp(true);
+	    				p1.checkCol(4, discardPile);
+	    				p1.updateScore();
+	    				p1NeedToFlip = false;
+	    				if(p1.checkIfAllFlipped())
+	    					p1EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    			if(p1.getHand() != null)
+	    			{
+	    				p1.replaceCard(4, discardPile);
+	    				p1.checkCol(4, discardPile);
+	    				p1.updateScore();
+	    				if(p1.checkIfAllFlipped())
+	    					p1EndTurns = true;
+	    				cycleTurn();
+	    			}
+	        	}
+	    		else if (x >= getWidth()/10 && y >= getHeight()/3 && x <= getWidth()*2/10 && y <= getHeight()*2/3 && p1.getArray().get(5).isClickable())
+	    		{
+	    			if(startOfGame)
+	    			{
+	    				p1.getArray().get(5).setFaceUp(true);
+	    				p1.updateScore();
+	    				p1NumStartCardsFlipped++;
+	    				if(p1NumStartCardsFlipped == 2)
+	    				{
+	    					cycleTurn();
+	    				}
+	    			}
+	    			if(p1NeedToFlip)
+	    			{
+	    				p1.getArray().get(5).setFaceUp(true);
+	    				p1.checkCol(5, discardPile);
+	    				p1.updateScore();
+	    				p1NeedToFlip = false;
+	    				if(p1.checkIfAllFlipped())
+	    					p1EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    			if(p1.getHand() != null)
+	    			{
+	    				p1.replaceCard(5, discardPile);
+	    				p1.checkCol(5, discardPile);
+	    				p1.updateScore();
+	    				if(p1.checkIfAllFlipped())
+	    					p1EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    		}
+	    		else if (x >= getWidth()*2/10 && y >= getHeight()/3 && x <= getWidth()*3/10 && y <= getHeight()*2/3 && p1.getArray().get(6).isClickable())
+	    		{
+	    			if(startOfGame)
+	    			{
+	    				p1.getArray().get(6).setFaceUp(true);
+	    				p1.updateScore();
+	    				p1NumStartCardsFlipped++;
+	    				if(p1NumStartCardsFlipped == 2)
+	    				{
+	    					cycleTurn();
+	    				}
+	    			}
+	    			if(p1NeedToFlip)
+	    			{
+	    				p1.getArray().get(6).setFaceUp(true);
+	    				p1.checkCol(6, discardPile);
+	    				p1.updateScore();
+	    				p1NeedToFlip = false;
+	    				if(p1.checkIfAllFlipped())
+	    					p1EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    			if(p1.getHand() != null)
+	    			{
+	    				p1.replaceCard(6, discardPile);
+	    				p1.checkCol(6, discardPile);
+	    				p1.updateScore();
+	    				if(p1.checkIfAllFlipped())
+	    					p1EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    		}
+	    		else if (x >= getWidth()*3/10 && y >= getHeight()/3 && x <= getWidth()*4/10 && y <= getHeight()*2/3 && p1.getArray().get(7).isClickable())
+	    		{
+	    			if(startOfGame)
+	    			{
+	    				p1.getArray().get(7).setFaceUp(true);
+	    				p1.updateScore();
+	    				p1NumStartCardsFlipped++;
+	    				if(p1NumStartCardsFlipped == 2)
+	    				{
+	    					cycleTurn();
+	    				}
+	    			}
+	    			if(p1NeedToFlip)
+	    			{
+	    				p1.getArray().get(7).setFaceUp(true);
+	    				p1.checkCol(7, discardPile);
+	    				p1.updateScore();
+	    				p1NeedToFlip = false;
+	    				if(p1.checkIfAllFlipped())
+	    					p1EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    			if(p1.getHand() != null)
+	    			{
+	    				p1.replaceCard(7, discardPile);
+	    				p1.checkCol(7, discardPile);
+	    				p1.updateScore();
+	    				if(p1.checkIfAllFlipped())
+	    					p1EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    		}
+	    		else if (x >= 0 && y >= getHeight()*2/3 && x <= getWidth()/10 && y <= getHeight() && p1.getArray().get(8).isClickable())
+	    		{
+	    			if(startOfGame)
+	    			{
+	    				p1.getArray().get(8).setFaceUp(true);
+	    				p1.updateScore();
+	    				p1NumStartCardsFlipped++;
+	    				if(p1NumStartCardsFlipped == 2)
+	    				{
+	    					cycleTurn();
+	    				}
+	    			}
+	    			if(p1NeedToFlip)
+	    			{
+	    				p1.getArray().get(8).setFaceUp(true);
+	    				p1.checkCol(8, discardPile);
+	    				p1.updateScore();
+	    				p1NeedToFlip = false;
+	    				if(p1.checkIfAllFlipped())
+	    					p1EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    			if(p1.getHand() != null)
+	    			{
+	    				p1.replaceCard(8, discardPile);
+	    				p1.checkCol(8, discardPile);
+	    				p1.updateScore();
+	    				if(p1.checkIfAllFlipped())
+	    					p1EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    		}
+	    		else if (x >= getWidth()/10 && y >= getHeight()*2/3 && x <= getWidth()*2/10 && y <= getHeight() && p1.getArray().get(9).isClickable())
+	    		{
+	    			if(startOfGame)
+	    			{
+	    				p1.getArray().get(9).setFaceUp(true);
+	    				p1.updateScore();
+	    				p1NumStartCardsFlipped++;
+	    				if(p1NumStartCardsFlipped == 2)
+	    				{
+	    					cycleTurn();
+	    				}
+	    			}
+	    			if(p1NeedToFlip)
+	    			{
+	    				p1.getArray().get(9).setFaceUp(true);
+	    				p1.checkCol(9, discardPile);
+	    				p1.updateScore();
+	    				p1NeedToFlip = false;
+	    				if(p1.checkIfAllFlipped())
+	    					p1EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    			if(p1.getHand() != null)
+	    			{
+	    				p1.replaceCard(9, discardPile);
+	    				p1.checkCol(9, discardPile);
+	    				p1.updateScore();
+	    				if(p1.checkIfAllFlipped())
+	    					p1EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    		}
+	    		else if (x >= getWidth()*2/10 && y >= getHeight()*2/3 && x <= getWidth()*3/10 && y <= getHeight() && p1.getArray().get(10).isClickable())
+	    		{
+	    			if(startOfGame)
+	    			{
+	    				p1.getArray().get(10).setFaceUp(true);
+	    				p1.updateScore();
+	    				p1NumStartCardsFlipped++;
+	    				if(p1NumStartCardsFlipped == 2)
+	    				{
+	    					cycleTurn();
+	    				}
+	    			}
+	    			if(p1NeedToFlip)
+	    			{
+	    				p1.getArray().get(10).setFaceUp(true);
+	    				p1.checkCol(10, discardPile);
+	    				p1.updateScore();
+	    				p1NeedToFlip = false;
+	    				if(p1.checkIfAllFlipped())
+	    					p1EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    			if(p1.getHand() != null)
+	    			{
+	    				p1.replaceCard(10, discardPile);
+	    				p1.checkCol(10, discardPile);
+	    				p1.updateScore();
+	    				if(p1.checkIfAllFlipped())
+	    					p1EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    		}
+	    		else if (x >= getWidth()*3/10 && y >= getHeight()*2/3 && x <= getWidth()*4/10 && y <= getHeight() && p1.getArray().get(11).isClickable())
+	    		{
+	    			if(startOfGame)
+	    			{
+	    				p1.getArray().get(11).setFaceUp(true);
+	    				p1.updateScore();
+	    				p1NumStartCardsFlipped++;
+	    				if(p1NumStartCardsFlipped == 2)
+	    				{
+	    					cycleTurn();
+	    				}
+	    			}
+	    			if(p1NeedToFlip)
+	    			{
+	    				p1.getArray().get(11).setFaceUp(true);
+	    				p1.checkCol(11, discardPile);
+	    				p1.updateScore();
+	    				p1NeedToFlip = false;
+	    				if(p1.checkIfAllFlipped())
+	    					p1EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    			if(p1.getHand() != null)
+	    			{
+	    				p1.replaceCard(11, discardPile);
+	    				p1.checkCol(11, discardPile);
+	    				p1.updateScore();
+	    				if(p1.checkIfAllFlipped())
+	    					p1EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    		}
+	    		
+	    		//deck
+	    		else if (x >= getWidth()*9/20 && y >= getHeight()*4/25 && x <= getWidth()*11/20 && y <= getHeight()*12/25 && !startOfGame) {
+	        		if(p1.getHand() == null && !p1NeedToFlip)
+	        		{
+	        			deck.playerDraw(p1, discardPile);
+	        			p1.setFaceUp();
+	        			p1DiscardDraw = false;
+	        		}
+	        	} 
+	    		
+	    		//discard
+	    		else if (x >= getWidth()*9/20 && y >= getHeight()*191/400 && x <= getWidth()*11/20 && y <= getHeight()*159/200 && !startOfGame) {
+	        		if(p1.getHand() != null && !p1DiscardDraw)
+	        		{
+	        			discardPile.addToDiscard(p1.getHand());
+	        			p1.setHand(null);
+	        			p1NeedToFlip = true;
+	        		}
+	        		if(p1.getHand() == null && !p1NeedToFlip)
+	        		{
+	        			discardPile.draw(p1);
+	        			p1.setFaceUp();
+	        			p1DiscardDraw = true;
+	        		}
+	        	}
+	    	}
+	        
+	    	if(p2.getTurn() && !newRound)
+	    	{
+	    		//p2 side cards
+	    		if (x >= getWidth()*6/10 && y >= 0 && x <= getWidth()*7/10 && y <= getHeight()/3 && p2.getArray().get(0).isClickable())
+	    		{
+	    			if(startOfGame)
+	    			{
+	    				p2.getArray().get(0).setFaceUp(true);
+	    				p2.updateScore();
+	    				p2NumStartCardsFlipped++;
+	    				if(p2NumStartCardsFlipped == 2)
+	    				{
+	    					setStartTurn();
+	    				}
+	    			}
+	    			if(p2NeedToFlip)
+	    			{
+	    				p2.getArray().get(0).setFaceUp(true);
+	    				p2.checkCol(0, discardPile);
+	    				p2.updateScore();
+	    				p2NeedToFlip = false;
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    			if(p2.getHand() != null)
+	    			{
+	    				p2.replaceCard(0, discardPile);
+	    				p2.checkCol(0, discardPile);
+	    				p2.updateScore();
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    		}
+	    		else if (x >= getWidth()*7/10 && y >= 0 && x <= getWidth()*8/10 && y <= getHeight()/3 && p2.getArray().get(1).isClickable())
+	    		{
+	    			if(startOfGame)
+	    			{
+	    				p2.getArray().get(1).setFaceUp(true);
+	    				p2.updateScore();
+	    				p2NumStartCardsFlipped++;
+	    				if(p2NumStartCardsFlipped == 2)
+	    				{
+	    					setStartTurn();
+	    				}
+	    			}
+	    			if(p2NeedToFlip)
+	    			{
+	    				p2.getArray().get(1).setFaceUp(true);
+	    				p2.checkCol(1, discardPile);
+	    				p2.updateScore();
+	    				p2NeedToFlip = false;
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    			if(p2.getHand() != null)
+	    			{
+	    				p2.replaceCard(1, discardPile);
+	    				p2.checkCol(1, discardPile);
+	    				p2.updateScore();
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    		}
+	    		else if (x >= getWidth()*8/10 && y >= 0 && x <= getWidth()*9/10 && y <= getHeight()/3 && p2.getArray().get(2).isClickable())
+	    		{
+	    			if(startOfGame)
+	    			{
+	    				p2.getArray().get(2).setFaceUp(true);
+	    				p2.updateScore();
+	    				p2NumStartCardsFlipped++;
+	    				if(p2NumStartCardsFlipped == 2)
+	    				{
+	    					setStartTurn();
+	    				}
+	    			}
+	    			if(p2NeedToFlip)
+	    			{
+	    				p2.getArray().get(2).setFaceUp(true);
+	    				p2.checkCol(2, discardPile);
+	    				p2.updateScore();
+	    				p2NeedToFlip = false;
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    			if(p2.getHand() != null)
+	    			{
+	    				p2.replaceCard(2, discardPile);
+	    				p2.checkCol(2, discardPile);
+	    				p2.updateScore();
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    		}
+	    		else if (x >= getWidth()*9/10 && y >= 0 && x <= getWidth() && y <= getHeight()/3 && p2.getArray().get(3).isClickable())
+	    		{
+	    			if(startOfGame)
+	    			{
+	    				p2.getArray().get(3).setFaceUp(true);
+	    				p2.updateScore();
+	    				p2NumStartCardsFlipped++;
+	    				if(p2NumStartCardsFlipped == 2)
+	    				{
+	    					setStartTurn();
+	    				}
+	    			}
+	    			if(p2NeedToFlip)
+	    			{
+	    				p2.getArray().get(3).setFaceUp(true);
+	    				p2.checkCol(3, discardPile);
+	    				p2.updateScore();
+	    				p2NeedToFlip = false;
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    			if(p2.getHand() != null)
+	    			{
+	    				p2.replaceCard(3, discardPile);
+	    				p2.checkCol(3, discardPile);
+	    				p2.updateScore();
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    		}
+	    		else if (x >= getWidth()*6/10 && y >= getHeight()/3 && x <= getWidth()*7/10 && y <= getHeight()*2/3 && p2.getArray().get(4).isClickable())
+	    		{
+	    			if(startOfGame)
+	    			{
+	    				p2.getArray().get(4).setFaceUp(true);
+	    				p2.updateScore();
+	    				p2NumStartCardsFlipped++;
+	    				if(p2NumStartCardsFlipped == 2)
+	    				{
+	    					setStartTurn();
+	    				}
+	    			}
+	    			if(p2NeedToFlip)
+	    			{
+	    				p2.getArray().get(4).setFaceUp(true);
+	    				p2.checkCol(4, discardPile);
+	    				p2.updateScore();
+	    				p2NeedToFlip = false;
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    			if(p2.getHand() != null)
+	    			{
+	    				p2.replaceCard(4, discardPile);
+	    				p2.checkCol(4, discardPile);
+	    				p2.updateScore();
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    		}
+	    		else if (x >= getWidth()*7/10 && y >= getHeight()/3 && x <= getWidth()*8/10 && y <= getHeight()*2/3 && p2.getArray().get(5).isClickable())
+	    		{
+	    			if(startOfGame)
+	    			{
+	    				p2.getArray().get(5).setFaceUp(true);
+	    				p2.updateScore();
+	    				p2NumStartCardsFlipped++;
+	    				if(p2NumStartCardsFlipped == 2)
+	    				{
+	    					setStartTurn();
+	    				}
+	    			}
+	    			if(p2NeedToFlip)
+	    			{
+	    				p2.getArray().get(5).setFaceUp(true);
+	    				p2.checkCol(5, discardPile);
+	    				p2.updateScore();
+	    				p2NeedToFlip = false;
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    			if(p2.getHand() != null)
+	    			{
+	    				p2.replaceCard(5, discardPile);
+	    				p2.checkCol(5, discardPile);
+	    				p2.updateScore();
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    		}
+	    		else if (x >= getWidth()*8/10 && y >= getHeight()/3 && x <= getWidth()*9/10 && y <= getHeight()*2/3 && p2.getArray().get(6).isClickable())
+	    		{
+	    			if(startOfGame)
+	    			{
+	    				p2.getArray().get(6).setFaceUp(true);
+	    				p2.updateScore();
+	    				p2NumStartCardsFlipped++;
+	    				if(p2NumStartCardsFlipped == 2)
+	    				{
+	    					setStartTurn();
+	    				}
+	    			}
+	    			if(p2NeedToFlip)
+	    			{
+	    				p2.getArray().get(6).setFaceUp(true);
+	    				p2.checkCol(6, discardPile);
+	    				p2.updateScore();
+	    				p2NeedToFlip = false;
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    			if(p2.getHand() != null)
+	    			{
+	    				p2.replaceCard(6, discardPile);
+	    				p2.checkCol(6, discardPile);
+	    				p2.updateScore();
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    		}
+	    		else if (x >= getWidth()*9/10 && y >= getHeight()/3 && x <= getWidth() && y <= getHeight()*2/3 && p2.getArray().get(7).isClickable())
+	    		{
+	    			if(startOfGame)
+	    			{
+	    				p2.getArray().get(7).setFaceUp(true);
+	    				p2.updateScore();
+	    				p2NumStartCardsFlipped++;
+	    				if(p2NumStartCardsFlipped == 2)
+	    				{
+	    					setStartTurn();
+	    				}
+	    			}
+	    			if(p2NeedToFlip)
+	    			{
+	    				p2.getArray().get(7).setFaceUp(true);
+	    				p2.checkCol(7, discardPile);
+	    				p2.updateScore();
+	    				p2NeedToFlip = false;
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    			if(p2.getHand() != null)
+	    			{
+	    				p2.replaceCard(7, discardPile);
+	    				p2.checkCol(7, discardPile);
+	    				p2.updateScore();
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    		}
+	    		else if (x >= getWidth()*6/10 && y >= getHeight()*2/3 && x <= getWidth()*7/10 && y <= getHeight() && p2.getArray().get(8).isClickable())
+	    		{
+	    			if(startOfGame)
+	    			{
+	    				p2.getArray().get(8).setFaceUp(true);
+	    				p2.updateScore();
+	    				p2NumStartCardsFlipped++;
+	    				if(p2NumStartCardsFlipped == 2)
+	    				{
+	    					setStartTurn();
+	    				}
+	    			}
+	    			if(p2NeedToFlip)
+	    			{
+	    				p2.getArray().get(8).setFaceUp(true);
+	    				p2.checkCol(8, discardPile);
+	    				p2.updateScore();
+	    				p2NeedToFlip = false;
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    			if(p2.getHand() != null)
+	    			{
+	    				p2.replaceCard(8, discardPile);
+	    				p2.checkCol(8, discardPile);
+	    				p2.updateScore();
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    		}
+	    		else if (x >= getWidth()*7/10 && y >= getHeight()*2/3 && x <= getWidth()*8/10 && y <= getHeight() && p2.getArray().get(9).isClickable())
+	    		{
+	    			if(startOfGame)
+	    			{
+	    				p2.getArray().get(9).setFaceUp(true);
+	    				p2.updateScore();
+	    				p2NumStartCardsFlipped++;
+	    				if(p2NumStartCardsFlipped == 2)
+	    				{
+	    					setStartTurn();
+	    				}
+	    			}
+	    			if(p2NeedToFlip)
+	    			{
+	    				p2.getArray().get(9).setFaceUp(true);
+	    				p2.checkCol(9, discardPile);
+	    				p2.updateScore();
+	    				p2NeedToFlip = false;
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    			if(p2.getHand() != null)
+	    			{
+	    				p2.replaceCard(9, discardPile);
+	    				p2.checkCol(9, discardPile);
+	    				p2.updateScore();
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    		}
+	    		else if (x >= getWidth()*8/10 && y >= getHeight()*2/3 && x <= getWidth()*9/10 && y <= getHeight() && p2.getArray().get(10).isClickable())
+	    		{
+	    			if(startOfGame)
+	    			{
+	    				p2.getArray().get(10).setFaceUp(true);
+	    				p2.updateScore();
+	    				p2NumStartCardsFlipped++;
+	    				if(p2NumStartCardsFlipped == 2)
+	    				{
+	    					setStartTurn();
+	    				}
+	    			}
+	    			if(p2NeedToFlip)
+	    			{
+	    				p2.getArray().get(10).setFaceUp(true);
+	    				p2.checkCol(10, discardPile);
+	    				p2.updateScore();
+	    				p2NeedToFlip = false;
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    			if(p2.getHand() != null)
+	    			{
+	    				p2.replaceCard(10, discardPile);
+	    				p2.checkCol(10, discardPile);
+	    				p2.updateScore();
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    		}
+	    		else if (x >= getWidth()*9/10 && y >= getHeight()*2/3 && x <= getWidth() && y <= getHeight() && p2.getArray().get(11).isClickable())
+	    		{
+	    			if(startOfGame)
+	    			{
+	    				p2.getArray().get(11).setFaceUp(true);
+	    				p2.updateScore();
+	    				p2NumStartCardsFlipped++;
+	    				if(p2NumStartCardsFlipped == 2)
+	    				{
+	    					setStartTurn();
+	    				}
+	    			}
+	    			if(p2NeedToFlip)
+	    			{
+	    				p2.getArray().get(11).setFaceUp(true);
+	    				p2.checkCol(11, discardPile);
+	    				p2.updateScore();
+	    				p2NeedToFlip = false;
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    			if(p2.getHand() != null)
+	    			{
+	    				p2.replaceCard(11, discardPile);
+	    				p2.checkCol(11, discardPile);
+	    				p2.updateScore();
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cycleTurn();
+	    			}
+	    		}
+	    		
+	    		//deck
+	    		else if (x >= getWidth()*9/20 && y >= getHeight()*4/25 && x <= getWidth()*11/20 && y <= getHeight()*12/25 && !startOfGame) {
+	    			if(p2.getHand() == null && !p2NeedToFlip)
+	        		{
+	        			deck.playerDraw(p2, discardPile);
+	        			p2.setFaceUp();
+	        			p2DiscardDraw = false;
+	        		}
+	        	} 
+	    		
+	    		//discard
+	    		else if (x >= getWidth()*9/20 && y >= getHeight()*191/400 && x <= getWidth()*11/20 && y <= getHeight()*159/200 && !startOfGame) {
+	    			if(p2.getHand() != null && !p2DiscardDraw)
+	        		{
+	        			discardPile.addToDiscard(p2.getHand());
+	        			p2.setHand(null);
+	        			p2NeedToFlip = true;
+	        		}
+	    			if(p2.getHand() == null && !p2NeedToFlip)
+	        		{
+	        			discardPile.draw(p2);
+	        			p2.setFaceUp();
+	        			p2DiscardDraw = true;
+	        		}
+	        	}
+	    	}
+	    	
+	    	//new round
+	    	else if(x >= 731 && y >= 500 && x <= 1188 && y <= 679 && gameHasEnded)
+        	{
+	    		System.out.println("MM");
+        		JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+                topFrame.getContentPane().removeAll();
+                topFrame.add(new MainMenuPanel());
+                topFrame.revalidate();
+                topFrame.repaint();
+        	}
+        	else if(x >= 731 && y >= 500 && x <= 1188 && y <= 679 && newRound)
+        	{
+        		startNewRound();
+        	}
+
+	    }
+	    repaint();
+	}
+}
