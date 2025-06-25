@@ -1,0 +1,40 @@
+import java.util.*;
+import javax.imageio.ImageIO;
+
+public class Discard {
+	ArrayList<Card> discard = new ArrayList<Card>();
+	
+	public Discard()
+	{
+		try {
+			discard.add(new Card(ImageIO.read(SkyjoCardsPanel.class.getResource("/Image/skyjoBack.jpg")), 0));
+		}
+		catch(Exception e)
+		{
+			System.out.println("Exception error");
+			return;
+		}
+		
+	}
+	
+	public void addToDiscard(Card x)
+	{
+		x.setFaceUp(true);
+		discard.add(x);
+	}
+	
+	public void draw(Player p)
+	{
+		p.holdCard(discard.remove(discard.size()-1));
+	}
+	
+	public Card getTopCard()
+	{
+		return discard.get(discard.size()-1);
+	}
+	
+	public ArrayList<Card> getPile()
+	{
+		return discard;
+	}
+}
