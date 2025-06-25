@@ -1,0 +1,87 @@
+import java.awt.image.*;
+import javax.imageio.ImageIO;
+import java.util.*;
+public class CardDeck {
+	
+	private ArrayList<Card> deck = new ArrayList<Card>();
+	private BufferedImage cm1, cm2, c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12;
+	
+	public CardDeck()
+	{
+		try
+		{
+			cm1 = ImageIO.read(SkyjoCardsPanel.class.getResource("/Image/skyjo-1.jpg"));
+			cm2 = ImageIO.read(SkyjoCardsPanel.class.getResource("/Image/skyjo-2.jpg"));
+			c0 = ImageIO.read(SkyjoCardsPanel.class.getResource("/Image/skyjo0.jpg"));
+			c1 = ImageIO.read(SkyjoCardsPanel.class.getResource("/Image/skyjo1.jpg"));
+			c2 = ImageIO.read(SkyjoCardsPanel.class.getResource("/Image/skyjo2.jpg"));
+			c3 = ImageIO.read(SkyjoCardsPanel.class.getResource("/Image/skyjo3.jpg"));
+			c4 = ImageIO.read(SkyjoCardsPanel.class.getResource("/Image/skyjo4.jpg"));
+			c5 = ImageIO.read(SkyjoCardsPanel.class.getResource("/Image/skyjo5.jpg"));
+			c6 = ImageIO.read(SkyjoCardsPanel.class.getResource("/Image/skyjo6.jpg"));
+			c7 = ImageIO.read(SkyjoCardsPanel.class.getResource("/Image/skyjo7.jpg"));
+			c8 = ImageIO.read(SkyjoCardsPanel.class.getResource("/Image/skyjo8.jpg"));
+			c9 = ImageIO.read(SkyjoCardsPanel.class.getResource("/Image/skyjo9.jpg"));
+			c10 = ImageIO.read(SkyjoCardsPanel.class.getResource("/Image/skyjo10.jpg"));
+			c11 = ImageIO.read(SkyjoCardsPanel.class.getResource("/Image/skyjo11.jpg"));
+			c12 = ImageIO.read(SkyjoCardsPanel.class.getResource("/Image/skyjo12.jpg"));
+		}
+		catch(Exception E)
+		{
+			System.out.println("Exception Error");
+			return;
+		}
+		
+		for(int i = 0; i < 5; i++){deck.add(new Card(cm2, -2));}
+		for(int i = 0; i < 10; i++){deck.add(new Card(cm1, -1));}
+		for(int i = 0; i < 15; i++){deck.add(new Card(c0, 0));}
+		for(int i = 0; i < 10; i++){deck.add(new Card(c1, 1));}
+		for(int i = 0; i < 10; i++){deck.add(new Card(c2, 2));}
+		for(int i = 0; i < 10; i++){deck.add(new Card(c3, 3));}
+		for(int i = 0; i < 10; i++){deck.add(new Card(c4, 4));}
+		for(int i = 0; i < 10; i++){deck.add(new Card(c5, 5));}
+		for(int i = 0; i < 10; i++){deck.add(new Card(c6, 6));}
+		for(int i = 0; i < 10; i++){deck.add(new Card(c7, 7));}
+		for(int i = 0; i < 10; i++){deck.add(new Card(c8, 8));}
+		for(int i = 0; i < 10; i++){deck.add(new Card(c9, 9));}
+		for(int i = 0; i < 10; i++){deck.add(new Card(c10, 10));}
+		for(int i = 0; i < 10; i++){deck.add(new Card(c11, 11));}
+		for(int i = 0; i < 10; i++){deck.add(new Card(c12, 12));}
+		
+		Collections.shuffle(deck);
+	}
+	
+	public void shuffle()
+	{
+		Collections.shuffle(deck);
+	}
+	
+	public void playerDraw(Player p, Discard d)
+	{
+		if(deck.size()>0)
+			p.holdCard(deck.remove(deck.size()-1));
+		else
+		{
+			for(int i = 0; i < d.getPile().size(); i++)
+			{
+				deck.add(d.getPile().remove(i));
+			}
+		}
+	}
+	
+	public void discardAdd(Discard d)
+	{
+		Card temp = deck.remove(deck.size()-1);
+		temp.setFaceUp(true);
+		d.addToDiscard(temp);
+	}
+	
+	public void makeArray(Player p)
+	{
+		p.getArray().clear();
+		for(int i = 0; i < 12; i++)
+		{
+			p.addToArray(deck.remove(deck.size()-1));
+		}
+	}
+}
