@@ -1,0 +1,147 @@
+import java.util.*;
+
+public class Player {
+	Card hand;
+	boolean turn = false;
+	ArrayList<Card> array = new ArrayList<Card>();
+	int score = 0;
+	int setScore = 0;
+	
+	public Player(CardDeck x)
+	{
+		x.makeArray(this);
+	}
+	
+	public void holdCard(Card x)
+	{
+		hand = x;
+	}
+	
+	public Card getHand()
+	{
+		return hand;
+	}
+	
+	public void setHand(Card x)
+	{
+		hand = x;
+	}
+	
+	public void setFaceUp()
+	{
+		hand.setFaceUp(true);
+	}
+	
+	public void addToArray(Card x)
+	{
+		array.add(x);
+	}
+	
+	public void setTurn(boolean b)
+	{
+		turn = b;
+	}
+	
+	public boolean getTurn()
+	{
+		return turn;
+	}
+	
+	public void discardHeld(Discard d)
+	{
+		d.addToDiscard(hand);
+		hand = null;
+	}
+	
+	public int getScore()
+	{
+		return score;
+	}
+	
+	public void doubleScore()
+	{
+		score = score*2;
+	}
+	
+	public void setBaseScore(int x)
+	{
+		setScore = x;
+	}
+	
+	public void updateScore()
+	{
+		score = setScore;
+		for(int i = 0; i < 12; i++)
+		{
+			if(array.get(i).getFaceUp())
+				score+=array.get(i).getValue();
+		}
+	}
+	
+	public void replaceCard(int i, Discard d)
+	{
+		array.add(i, hand);
+		d.addToDiscard(array.remove(i+1));
+		hand = null;
+	}
+	
+	public boolean checkIfAllFlipped()
+	{
+		int cnt = 0;
+		for(int i = 0; i < 12; i++)
+		{
+			if(array.get(i).getFaceUp())
+				cnt++;
+		}
+		
+		if(cnt == 12)
+			return true;
+		else
+			return false;
+	}
+	
+	public void checkCol(int i, Discard d)
+	{
+		if(i <= 3)
+		{
+			if(array.get(i).getValue() == array.get(i+4).getValue() && array.get(i).getValue() == array.get(i+8).getValue())
+			{
+				d.addToDiscard(array.remove(i));
+				array.add(i, new Card());
+				d.addToDiscard(array.remove(i+4));
+				array.add(i+4, new Card());
+				d.addToDiscard(array.remove(i+8));
+				array.add(i+8, new Card());
+			}
+		}
+		else if(i > 3 && i <= 7)
+		{
+			if(array.get(i).getValue() == array.get(i+4).getValue() && array.get(i).getValue() == array.get(i-4).getValue())
+			{
+				d.addToDiscard(array.remove(i));
+				array.add(i, new Card());
+				d.addToDiscard(array.remove(i+4));
+				array.add(i+4, new Card());
+				d.addToDiscard(array.remove(i-4));
+				array.add(i-4, new Card());
+			}
+		}
+		else
+		{
+			if(array.get(i).getValue() == array.get(i-4).getValue() && array.get(i).getValue() == array.get(i-8).getValue())
+			{
+				d.addToDiscard(array.remove(i));
+				array.add(i, new Card());
+				d.addToDiscard(array.remove(i-4));
+				array.add(i-4, new Card());
+				d.addToDiscard(array.remove(i-8));
+				array.add(i-8, new Card());
+			}
+		}
+	}
+	
+	public ArrayList<Card> getArray()
+	{
+		return array;
+	}
+}
