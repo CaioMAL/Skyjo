@@ -1,15 +1,20 @@
 import java.awt.image.BufferedImage;
+
 import javax.imageio.ImageIO;
 
-
 public class Card {
-	private BufferedImage face;
+	private BufferedImage face, cb, empty;
 	private int value;
+	private boolean faceUp;
+	private boolean clickable;
+	
 	public Card(BufferedImage i, int val)
 	{
 		try
 		{
 			face = i;
+			cb = ImageIO.read(SkyjoCardsPanel.class.getResource("/Image/skyjoBack.jpg"));
+			empty = ImageIO.read(SkyjoCardsPanel.class.getResource("/Image/empty.png"));
 		}
 		catch(Exception e)
 		{
@@ -17,18 +22,58 @@ public class Card {
 			return;
 		}
 		value = val;
+		faceUp = false;
+		clickable = true;
 	}
+	
+	public Card()
+	{
+		try
+		{
+			face = empty;
+			cb = ImageIO.read(SkyjoCardsPanel.class.getResource("/Image/skyjoBack.jpg"));
+			empty = ImageIO.read(SkyjoCardsPanel.class.getResource("/Image/empty.png"));
+		}
+		catch(Exception e)
+		{
+			System.out.println("Exception error");
+			return;
+		}
+		value = 0;
+		faceUp = true;
+		clickable = false;
+	}
+	
 	public int getValue()
 	{
 		return value;
 	}
+	
+	public boolean isClickable()
+	{
+		return clickable;
+	}
+	
 	public void setFace(BufferedImage i)
 	{
 		face = i;
 	}
+	
 	public BufferedImage getFace()
 	{
-		return face;
+		if(faceUp)
+			return face;
+		else
+			return cb;
+	}
+	
+	public boolean getFaceUp()
+	{
+		return faceUp;
+	}
+	
+	public void setFaceUp(boolean b)
+	{
+		faceUp = b;
 	}
 }
-
