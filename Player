@@ -1,5 +1,7 @@
 import java.util.*;
 
+//add time between
+
 public class Player {
 	Card hand;
 	boolean turn = false;
@@ -21,6 +23,82 @@ public class Player {
 	{
 		return hand;
 	}
+	
+	public int heldMatchesCol()
+	{
+		for(int i = 0; i < 4; i++)
+		{
+			if(array.get(i).isClickable() && array.get(i).getFaceUp() && hand.getValue() == array.get(i).getValue())
+			{
+				if(hand.getValue() == array.get(i+4).getValue())
+					return i + 8;
+				else if(hand.getValue() == array.get(i+8).getValue())
+					return i + 4;
+				else
+				{
+					int rand = (int)(Math.random() * 2) + 1;
+					if(rand == 1)
+						return i+4;
+					else
+						return i+8;
+				}
+			}
+		}
+		for(int i = 4; i < 8; i++)
+		{
+			if(array.get(i).isClickable() && array.get(i).getFaceUp() && hand.getValue() == array.get(i).getValue())
+			{
+				if(hand.getValue() == array.get(i+4).getValue())
+					return i - 4;
+				else if(hand.getValue() == array.get(i-4).getValue())
+					return i + 4;
+				else
+				{
+					int rand = (int)(Math.random() * 2) + 1;
+					if(rand == 1)
+						return i-4;
+					else
+						return i+4;
+				}
+			}
+		}
+		for(int i = 8; i < 12; i++)
+		{
+			if(array.get(i).isClickable() && array.get(i).getFaceUp() && hand.getValue() == array.get(i).getValue())
+			{
+				if(hand.getValue() == array.get(i-4).getValue())
+					return i - 8;
+				else if(hand.getValue() == array.get(i-8).getValue())
+					return i - 4;
+				else
+				{
+					int rand = (int)(Math.random() * 2) + 1;
+					if(rand == 1)
+						return i-4;
+					else
+						return i-8;
+				}
+			}
+		}
+		return -1;
+	}
+	
+	public int getIndexHighestValue()
+	{
+		int max = -2;
+		int index = 0;
+		for(int i = 0; i < 12; i++)
+		{
+			if(array.get(i).getValue() > max)
+			{
+				max = array.get(i).getValue();
+				index = i;
+			}
+		}
+		return index;
+	}
+	
+	
 	
 	public void setHand(Card x)
 	{
