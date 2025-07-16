@@ -84,7 +84,7 @@ public class SkyjoCardsPanel extends JPanel implements MouseListener{
 			g.drawString("P2 Flip Remaining Cards", getWidth()*141/352, getHeight()*5/50);
 		if(newRound)
 		{
-			g.drawImage(table, 0, 0, getWidth(), getHeight(), null);
+			g.drawImage(table, 350, 200, 1200, 600, null);
 			g.setColor(Color.BLACK);
 			g.setFont(new Font("Ariel", Font.PLAIN, 45));
 			g.drawString("Round over, click below to continue", getWidth()*100/300, getHeight()*1/3);
