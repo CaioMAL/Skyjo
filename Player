@@ -1,7 +1,5 @@
 import java.util.*;
 
-//add time between
-
 public class Player {
 	Card hand;
 	boolean turn = false;
