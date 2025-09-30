@@ -9,7 +9,7 @@ import java.util.*;
 
 public class SkyjoCardsAI extends JPanel implements MouseListener{
 	
-	private BufferedImage cb, table, again, next;
+	private BufferedImage cb, table, again, next, aiMove;
 	private CardDeck deck = new CardDeck();
 	private Player p1 = new Player(deck);
 	private Player p2 = new Player(deck);
@@ -31,6 +31,8 @@ public class SkyjoCardsAI extends JPanel implements MouseListener{
 	private String winner = "no one";
 	private boolean p2HasDrawn = false;
 	private int cardIndexToReplace = -1;
+	private int margin = 4;
+	private int counter = 0;
 	
 	public SkyjoCardsAI()
 	{
@@ -40,6 +42,7 @@ public class SkyjoCardsAI extends JPanel implements MouseListener{
 			table = ImageIO.read(SkyjoCardsAI.class.getResource("/Image/table.jpg"));
 			again = ImageIO.read(SkyjoCardsAI.class.getResource("/Image/again.png"));
 			next = ImageIO.read(SkyjoCardsAI.class.getResource("/Image/next.png"));
+			aiMove = ImageIO.read(SkyjoCardsAI.class.getResource("/Image/aiMove.png"));
 		}
 		catch(Exception E)
 		{
@@ -65,6 +68,8 @@ public class SkyjoCardsAI extends JPanel implements MouseListener{
 		
 		g.drawString("P1 Score: " + p1.getScore(), getWidth()*39/88, getHeight()*45/50);
 		g.drawString("P2 Score: " + p2.getScore(), getWidth()*39/88, getHeight()*48/50);
+		
+		g.drawImage(aiMove, 760, 40, 400, 200, null);
 		
 		//draw rules/info
 		if(startOfGame)
@@ -294,6 +299,16 @@ public class SkyjoCardsAI extends JPanel implements MouseListener{
 	    		//p1 side cards
 	    		if (x >= 0 && y >= 0 && x <= getWidth()/10 && y <= getHeight()/3 && p1.getArray().get(0).isClickable())
 	    		{
+	    			if(!startOfGame && p1.getArray().get(0).getFaceUp())
+	    			{
+	    				counter = 0;
+	    				System.out.println("counter: " + counter);
+	    			}
+	    			if(!startOfGame && !p1.getArray().get(0).getFaceUp())
+	    			{
+	    				counter++;
+	    				System.out.println("counter: " + counter);
+	    			}
 	    			if(startOfGame)
 	    			{
 	    				p1.getArray().get(0).setFaceUp(true);
@@ -326,6 +341,16 @@ public class SkyjoCardsAI extends JPanel implements MouseListener{
 	    		}
 	    		else if (x >= getWidth()/10 && y >= 0 && x <= getWidth()*2/10 && y <= getHeight()/3 && p1.getArray().get(1).isClickable())
 	    		{
+	    			if(!startOfGame && p1.getArray().get(1).getFaceUp())
+	    			{
+	    				counter = 0;
+	    				System.out.println("counter: " + counter);
+	    			}
+	    			if(!startOfGame && !p1.getArray().get(1).getFaceUp())
+	    			{
+	    				counter++;
+	    				System.out.println("counter: " + counter);
+	    			}
 	    			if(startOfGame)
 	    			{
 	    				p1.getArray().get(1).setFaceUp(true);
@@ -358,6 +383,16 @@ public class SkyjoCardsAI extends JPanel implements MouseListener{
 	    		}
 	    		else if (x >= getWidth()*2/10 && y >= 0 && x <= getWidth()*3/10 && y <= getHeight()/3 && p1.getArray().get(2).isClickable())
 	    		{	
+	    			if(!startOfGame && p1.getArray().get(2).getFaceUp())
+	    			{
+	    				counter = 0;
+	    				System.out.println("counter: " + counter);
+	    			}
+	    			if(!startOfGame && !p1.getArray().get(2).getFaceUp())
+	    			{
+	    				counter++;
+	    				System.out.println("counter: " + counter);
+	    			}
 	    			if(startOfGame)
 	    			{
 	    				p1.getArray().get(2).setFaceUp(true);
@@ -390,6 +425,16 @@ public class SkyjoCardsAI extends JPanel implements MouseListener{
 	    		}
 	    		else if (x >= getWidth()*3/10 && y >= 0 && x <= getWidth()*4/10 && y <= getHeight()/3 && p1.getArray().get(3).isClickable())
 	    		{
+	    			if(!startOfGame && p1.getArray().get(3).getFaceUp())
+	    			{
+	    				counter = 0;
+	    				System.out.println("counter: " + counter);
+	    			}
+	    			if(!startOfGame && !p1.getArray().get(3).getFaceUp())
+	    			{
+	    				counter++;
+	    				System.out.println("counter: " + counter);
+	    			}
 	    			if(startOfGame)
 	    			{
 	    				p1.getArray().get(3).setFaceUp(true);
@@ -422,6 +467,16 @@ public class SkyjoCardsAI extends JPanel implements MouseListener{
 	    		}
 	    		else if (x >= 0 && y >= getHeight()/3 && x <= getWidth()/10 && y <= getHeight()*2/3 && p1.getArray().get(4).isClickable())
 	        	{
+	    			if(!startOfGame && p1.getArray().get(4).getFaceUp())
+	    			{
+	    				counter = 0;
+	    				System.out.println("counter: " + counter);
+	    			}
+	    			if(!startOfGame && !p1.getArray().get(4).getFaceUp())
+	    			{
+	    				counter++;
+	    				System.out.println("counter: " + counter);
+	    			}
 	    			if(startOfGame)
 	    			{
 	    				p1.getArray().get(4).setFaceUp(true);
@@ -454,6 +509,16 @@ public class SkyjoCardsAI extends JPanel implements MouseListener{
 	        	}
 	    		else if (x >= getWidth()/10 && y >= getHeight()/3 && x <= getWidth()*2/10 && y <= getHeight()*2/3 && p1.getArray().get(5).isClickable())
 	    		{
+	    			if(!startOfGame && p1.getArray().get(5).getFaceUp())
+	    			{
+	    				counter = 0;
+	    				System.out.println("counter: " + counter);
+	    			}
+	    			if(!startOfGame && !p1.getArray().get(5).getFaceUp())
+	    			{
+	    				counter++;
+	    				System.out.println("counter: " + counter);
+	    			}
 	    			if(startOfGame)
 	    			{
 	    				p1.getArray().get(5).setFaceUp(true);
@@ -486,6 +551,16 @@ public class SkyjoCardsAI extends JPanel implements MouseListener{
 	    		}
 	    		else if (x >= getWidth()*2/10 && y >= getHeight()/3 && x <= getWidth()*3/10 && y <= getHeight()*2/3 && p1.getArray().get(6).isClickable())
 	    		{
+	    			if(!startOfGame && p1.getArray().get(6).getFaceUp())
+	    			{
+	    				counter = 0;
+	    				System.out.println("counter: " + counter);
+	    			}
+	    			if(!startOfGame && !p1.getArray().get(6).getFaceUp())
+	    			{
+	    				counter++;
+	    				System.out.println("counter: " + counter);
+	    			}
 	    			if(startOfGame)
 	    			{
 	    				p1.getArray().get(6).setFaceUp(true);
@@ -518,6 +593,16 @@ public class SkyjoCardsAI extends JPanel implements MouseListener{
 	    		}
 	    		else if (x >= getWidth()*3/10 && y >= getHeight()/3 && x <= getWidth()*4/10 && y <= getHeight()*2/3 && p1.getArray().get(7).isClickable())
 	    		{
+	    			if(!startOfGame && p1.getArray().get(7).getFaceUp())
+	    			{
+	    				counter = 0;
+	    				System.out.println("counter: " + counter);
+	    			}
+	    			if(!startOfGame && !p1.getArray().get(7).getFaceUp())
+	    			{
+	    				counter++;
+	    				System.out.println("counter: " + counter);
+	    			}
 	    			if(startOfGame)
 	    			{
 	    				p1.getArray().get(7).setFaceUp(true);
@@ -550,6 +635,16 @@ public class SkyjoCardsAI extends JPanel implements MouseListener{
 	    		}
 	    		else if (x >= 0 && y >= getHeight()*2/3 && x <= getWidth()/10 && y <= getHeight() && p1.getArray().get(8).isClickable())
 	    		{
+	    			if(!startOfGame && p1.getArray().get(8).getFaceUp())
+	    			{
+	    				counter = 0;
+	    				System.out.println("counter: " + counter);
+	    			}
+	    			if(!startOfGame && !p1.getArray().get(8).getFaceUp())
+	    			{
+	    				counter++;
+	    				System.out.println("counter: " + counter);
+	    			}
 	    			if(startOfGame)
 	    			{
 	    				p1.getArray().get(8).setFaceUp(true);
@@ -582,6 +677,16 @@ public class SkyjoCardsAI extends JPanel implements MouseListener{
 	    		}
 	    		else if (x >= getWidth()/10 && y >= getHeight()*2/3 && x <= getWidth()*2/10 && y <= getHeight() && p1.getArray().get(9).isClickable())
 	    		{
+	    			if(!startOfGame && p1.getArray().get(9).getFaceUp())
+	    			{
+	    				counter = 0;
+	    				System.out.println("counter: " + counter);
+	    			}
+	    			if(!startOfGame && !p1.getArray().get(9).getFaceUp())
+	    			{
+	    				counter++;
+	    				System.out.println("counter: " + counter);
+	    			}
 	    			if(startOfGame)
 	    			{
 	    				p1.getArray().get(9).setFaceUp(true);
@@ -614,6 +719,16 @@ public class SkyjoCardsAI extends JPanel implements MouseListener{
 	    		}
 	    		else if (x >= getWidth()*2/10 && y >= getHeight()*2/3 && x <= getWidth()*3/10 && y <= getHeight() && p1.getArray().get(10).isClickable())
 	    		{
+	    			if(!startOfGame && p1.getArray().get(10).getFaceUp())
+	    			{
+	    				counter = 0;
+	    				System.out.println("counter: " + counter);
+	    			}
+	    			if(!startOfGame && !p1.getArray().get(10).getFaceUp())
+	    			{
+	    				counter++;
+	    				System.out.println("counter: " + counter);
+	    			}
 	    			if(startOfGame)
 	    			{
 	    				p1.getArray().get(10).setFaceUp(true);
@@ -646,6 +761,16 @@ public class SkyjoCardsAI extends JPanel implements MouseListener{
 	    		}
 	    		else if (x >= getWidth()*3/10 && y >= getHeight()*2/3 && x <= getWidth()*4/10 && y <= getHeight() && p1.getArray().get(11).isClickable())
 	    		{
+	    			if(!startOfGame && p1.getArray().get(11).getFaceUp())
+	    			{
+	    				counter = 0;
+	    				System.out.println("counter: " + counter);
+	    			}
+	    			if(!startOfGame && !p1.getArray().get(11).getFaceUp())
+	    			{
+	    				counter++;
+	    				System.out.println("counter: " + counter);
+	    			}
 	    			if(startOfGame)
 	    			{
 	    				p1.getArray().get(11).setFaceUp(true);
@@ -706,22 +831,18 @@ public class SkyjoCardsAI extends JPanel implements MouseListener{
 	    	
 	    	
 	        //p2 side cards
-	    	else if(p2.getTurn() && !newRound)
+	    	else if(x >= 880 && x <= 1040 && y >= 116 && y <= 165 && p2.getTurn() && !newRound)
 	    	{
 	    		int cardIndexToFlip = (int)(Math.random() * 12);
-	    		if(p2.getArray().get(cardIndexToFlip).getFaceUp())
+	    		while(p2.getArray().get(cardIndexToFlip).getFaceUp())
 	    		{
-	    			while(p2.getArray().get(cardIndexToFlip).getFaceUp())
-	    			{
-	    				cardIndexToFlip = (int)(Math.random() * 12);
-	    			}
+	    			cardIndexToFlip = (int)(Math.random() * 12);
 	    		}
-	    		int cardIndex = (int)(Math.random() * 12);
-	    		System.out.println(cardIndex);
+	    		System.out.println("card index: " + cardIndexToFlip);
 	    		
 	    		if(startOfGame)
 	    		{
-	    			p2.getArray().get(cardIndex).setFaceUp(true);
+	    			p2.getArray().get(cardIndexToFlip).setFaceUp(true);
 	    			p2.updateScore();
 	    			p2NumStartCardsFlipped++;
 	    			if(p2NumStartCardsFlipped == 2)
@@ -754,6 +875,8 @@ public class SkyjoCardsAI extends JPanel implements MouseListener{
 	    			}
 	    			else if(discardPile.getTopCard().getValue() >= 7)
 	    				thresholdDrawVDiscard = 0;
+	    			else if(discardPile.getTopCard().getValue() <= 4)
+	    				thresholdDrawVDiscard = 1;
 	    		
 	    			System.out.println("drawVdiscard thresh: " + thresholdDrawVDiscard);
 	    			System.out.println("drawVdiscard decision: " + decisionDrawVDiscard);
@@ -791,7 +914,18 @@ public class SkyjoCardsAI extends JPanel implements MouseListener{
 	    			System.out.println("discardVreplace decision: " + decisionDiscardVReplace);
 	    			
 	    			if(cardIndexToReplace > -1)
-	    				decisionDiscardVReplace = 1;
+	    			{
+	    				
+	    				System.out.println("card index to replace: " + cardIndexToReplace);
+	    				p2.replaceCard(cardIndexToReplace, discardPile);
+	    				p2.checkCol(cardIndexToReplace, discardPile);
+	    				p2.updateScore();
+	    				if(p2.checkIfAllFlipped())
+	    					p2EndTurns = true;
+	    				cardIndexToReplace = -1;
+	    				p2HasDrawn = false;
+	    				cycleTurn();
+	    			}
 	    			else if(p2.getHand().getValue() > 7)
 	    				decisionDiscardVReplace = 0;
 	    			else if(p2.getHand().getValue() < 4)
@@ -800,34 +934,53 @@ public class SkyjoCardsAI extends JPanel implements MouseListener{
 	    			if(decisionDiscardVReplace < thresholdDiscardVReplace)
 	    			{
 	    				//discard
+	    				System.out.println("discard card drawn");
+	    				System.out.println("card: " + p2.getHand().getValue());
 	    				discardPile.addToDiscard(p2.getHand());
 	        			p2.setHand(null);
 	        			p2NeedToFlip = true;
 	        			p2HasDrawn = false;
 	    			}
+	    			
 	    			else
 	    			{
-	    				//replace
-	    				if(cardIndexToReplace > -1)
+	    				System.out.println("highest value: " + p2.getHighestValue() + "current card: " + p2.getHand().getValue());
+	    				if(counter >= 4 && p2.getHowManyFlipped() <= 11)
 	    				{
-	    					p2.replaceCard(cardIndexToReplace, discardPile);
-		    				p2.checkCol(cardIndexToReplace, discardPile);
+	    					System.out.println("counter: " + counter);
+	    					p2.replaceCard(cardIndexToFlip, discardPile);
+		    				p2.checkCol(cardIndexToFlip, discardPile);
 		    				p2.updateScore();
 		    				if(p2.checkIfAllFlipped())
 		    					p2EndTurns = true;
-		    				cardIndexToReplace = -1;
 		    				p2HasDrawn = false;
 		    				cycleTurn();
 	    				}
-	    				else
+	    				//replace
+	    				else if(p2.getHighestValue() - p2.getHand().getValue() >= margin && !p2.matchingCards())
 	    				{
-	    					p2.replaceCard(cardIndex, discardPile);
-		    				p2.checkCol(cardIndex, discardPile);
+	    					//replace card if greater than margin
+	    					System.out.println("highest value: " + p2.getHighestValue() + " index: " + p2.getIndexHighestValue());
+	    					p2.replaceCard(p2.getIndexHighestValue(), discardPile);
+		    				p2.checkCol(p2.getIndexHighestValue(), discardPile);
 		    				p2.updateScore();
 		    				if(p2.checkIfAllFlipped())
 		    					p2EndTurns = true;
 		    				p2HasDrawn = false;
 		    				cycleTurn();
+	    				}
+	    				
+	    				else
+	    				{
+	    					//replace face down card
+	    					System.out.println("replace face down card: " + cardIndexToFlip);
+	    					p2.replaceCard(cardIndexToFlip, discardPile);
+	    					p2.checkCol(cardIndexToFlip, discardPile);
+	    					p2.updateScore();
+	    					if(p2.checkIfAllFlipped())
+	    						p2EndTurns = true;
+	    					p2HasDrawn = false;
+	    					cycleTurn();
 	    				}
 	    			}
 	    		}
@@ -845,15 +998,29 @@ public class SkyjoCardsAI extends JPanel implements MouseListener{
 	    				p2HasDrawn = false;
 	    				cycleTurn();
     				}
-    				else
+	    			else if(p2.getHighestValue() - p2.getHand().getValue() >= margin && !p2.matchingCards())
     				{
-    					p2.replaceCard(cardIndex, discardPile);
-	    				p2.checkCol(cardIndex, discardPile);
+    					//replace card if greater than margin
+    					System.out.println("highest value: " + p2.getHighestValue() + " index: " + p2.getIndexHighestValue());
+    					p2.replaceCard(p2.getIndexHighestValue(), discardPile);
+	    				p2.checkCol(p2.getIndexHighestValue(), discardPile);
 	    				p2.updateScore();
 	    				if(p2.checkIfAllFlipped())
 	    					p2EndTurns = true;
 	    				p2HasDrawn = false;
 	    				cycleTurn();
+    				}
+    				else
+    				{
+    					//replace face down card
+    					System.out.println("replace face down card: " + cardIndexToFlip);
+    					p2.replaceCard(cardIndexToFlip, discardPile);
+    					p2.checkCol(cardIndexToFlip, discardPile);
+    					p2.updateScore();
+    					if(p2.checkIfAllFlipped())
+    						p2EndTurns = true;
+    					p2HasDrawn = false;
+    					cycleTurn();
     				}
 	    		}
 	    	}
