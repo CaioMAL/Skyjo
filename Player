@@ -24,18 +24,35 @@ public class Player {
 		return hand;
 	}
 	
+	public int getHowManyFlipped()
+	{
+		int cnt = 0;
+		
+		for(int i = 0; i < 12; i++)
+		{
+			if(array.get(i).getFaceUp())
+				cnt++;
+		}
+		
+		return cnt;
+	}
+	
 	public int heldMatchesCol()
 	{
 		for(int i = 0; i < 4; i++)
 		{
 			if(array.get(i).isClickable() && array.get(i).getFaceUp() && hand.getValue() == array.get(i).getValue())
 			{
-				if(hand.getValue() == array.get(i+4).getValue())
+				if(array.get(i+4).getFaceUp() && hand.getValue() == array.get(i+4).getValue())
 					return i + 8;
-				else if(hand.getValue() == array.get(i+8).getValue())
+				else if(array.get(i+8).getFaceUp() && hand.getValue() == array.get(i+8).getValue() && array.get(i+8).getFaceUp())
 					return i + 4;
 				else
 				{
+					if(array.get(i+4).getFaceUp())
+						return i+8;
+					else if(array.get(i+8).getFaceUp())
+						return i+4;
 					int rand = (int)(Math.random() * 2) + 1;
 					if(rand == 1)
 						return i+4;
@@ -48,12 +65,16 @@ public class Player {
 		{
 			if(array.get(i).isClickable() && array.get(i).getFaceUp() && hand.getValue() == array.get(i).getValue())
 			{
-				if(hand.getValue() == array.get(i+4).getValue())
+				if(array.get(i+4).getFaceUp() && hand.getValue() == array.get(i+4).getValue())
 					return i - 4;
-				else if(hand.getValue() == array.get(i-4).getValue())
+				else if(array.get(i-4).getFaceUp() && hand.getValue() == array.get(i-4).getValue())
 					return i + 4;
 				else
 				{
+					if(array.get(i+4).getFaceUp())
+						return i-4;
+					else if(array.get(i-4).getFaceUp())
+						return i+4;
 					int rand = (int)(Math.random() * 2) + 1;
 					if(rand == 1)
 						return i-4;
@@ -66,17 +87,24 @@ public class Player {
 		{
 			if(array.get(i).isClickable() && array.get(i).getFaceUp() && hand.getValue() == array.get(i).getValue())
 			{
-				if(hand.getValue() == array.get(i-4).getValue())
+				if(array.get(i-4).getFaceUp() && hand.getValue() == array.get(i-4).getValue())
 					return i - 8;
-				else if(hand.getValue() == array.get(i-8).getValue())
+				else if(array.get(i-8).getFaceUp() && hand.getValue() == array.get(i-8).getValue())
 					return i - 4;
 				else
 				{
-					int rand = (int)(Math.random() * 2) + 1;
-					if(rand == 1)
+					if(array.get(i-4).getFaceUp())
+						return i-8;
+					else if(array.get(i-8).getFaceUp())
 						return i-4;
 					else
-						return i-8;
+					{
+						int rand = (int)(Math.random() * 2) + 1;
+						if(rand == 1)
+							return i-4;
+						else
+							return i-8;
+					}
 				}
 			}
 		}
@@ -142,13 +170,26 @@ public class Player {
 		return -1;
 	}
 	
+	public boolean matchingCards()
+	{
+		if((array.get(0).getValue() == array.get(4).getValue() && array.get(0).getFaceUp() && array.get(4).getFaceUp()) || (array.get(0).getValue() == array.get(8).getValue() && array.get(0).getFaceUp() && array.get(8).getFaceUp()) || (array.get(4).getValue() == array.get(8).getValue() && array.get(4).getFaceUp() && array.get(8).getFaceUp()))
+			return true;
+		if((array.get(1).getValue() == array.get(5).getValue() && array.get(1).getFaceUp() && array.get(5).getFaceUp()) || (array.get(1).getValue() == array.get(9).getValue() && array.get(1).getFaceUp() && array.get(9).getFaceUp()) || (array.get(5).getValue() == array.get(9).getValue() && array.get(5).getFaceUp() && array.get(9).getFaceUp()))
+			return true;
+		if((array.get(2).getValue() == array.get(6).getValue() && array.get(2).getFaceUp() && array.get(6).getFaceUp()) || (array.get(2).getValue() == array.get(10).getValue() && array.get(2).getFaceUp() && array.get(10).getFaceUp()) || (array.get(6).getValue() == array.get(10).getValue() && array.get(6).getFaceUp() && array.get(10).getFaceUp()))
+			return true;
+		if((array.get(3).getValue() == array.get(7).getValue() && array.get(3).getFaceUp() && array.get(7).getFaceUp()) || (array.get(3).getValue() == array.get(11).getValue() && array.get(3).getFaceUp() && array.get(11).getFaceUp()) || (array.get(7).getValue() == array.get(11).getValue() && array.get(7).getFaceUp() && array.get(11).getFaceUp()))
+			return true;
+		return false;
+	}
+	
 	public int getIndexHighestValue()
 	{
 		int max = -2;
 		int index = 0;
 		for(int i = 0; i < 12; i++)
 		{
-			if(array.get(i).getValue() > max)
+			if(array.get(i).getValue() > max && array.get(i).getFaceUp())
 			{
 				max = array.get(i).getValue();
 				index = i;
@@ -158,6 +199,19 @@ public class Player {
 	}
 	
 	
+	
+	public int getHighestValue()
+	{
+		int max = -2;
+		for(int i = 0; i < 12; i++)
+		{
+			if(array.get(i).getValue() > max && array.get(i).getFaceUp())
+			{
+				max = array.get(i).getValue();
+			}
+		}
+		return max;
+	}
 	
 	public void setHand(Card x)
 	{
@@ -241,7 +295,7 @@ public class Player {
 	{
 		if(i <= 3)
 		{
-			if(array.get(i).getValue() == array.get(i+4).getValue() && array.get(i).getValue() == array.get(i+8).getValue())
+			if(array.get(i).getValue() == array.get(i+4).getValue() && array.get(i).getValue() == array.get(i+8).getValue() && array.get(i).getFaceUp() && array.get(i+4).getFaceUp() && array.get(i+8).getFaceUp())
 			{
 				d.addToDiscard(array.remove(i));
 				array.add(i, new Card());
@@ -253,7 +307,7 @@ public class Player {
 		}
 		else if(i > 3 && i <= 7)
 		{
-			if(array.get(i).getValue() == array.get(i+4).getValue() && array.get(i).getValue() == array.get(i-4).getValue())
+			if(array.get(i).getValue() == array.get(i+4).getValue() && array.get(i).getValue() == array.get(i-4).getValue() && array.get(i).getFaceUp() && array.get(i+4).getFaceUp() && array.get(i-4).getFaceUp())
 			{
 				d.addToDiscard(array.remove(i));
 				array.add(i, new Card());
@@ -265,7 +319,7 @@ public class Player {
 		}
 		else
 		{
-			if(array.get(i).getValue() == array.get(i-4).getValue() && array.get(i).getValue() == array.get(i-8).getValue())
+			if(array.get(i).getValue() == array.get(i-4).getValue() && array.get(i).getValue() == array.get(i-8).getValue() && array.get(i).getFaceUp() && array.get(i-4).getFaceUp() && array.get(i-8).getFaceUp())
 			{
 				d.addToDiscard(array.remove(i));
 				array.add(i, new Card());
